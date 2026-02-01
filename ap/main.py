@@ -10,6 +10,7 @@ Functions:
 import sys
 import os
 import argparse
+import warnings
 import ap.commands as commands
 
 # Create the top-level parser
@@ -18,6 +19,11 @@ def make_parser():
     """Create the top-level parser"""
 
     parser = argparse.ArgumentParser(description="ActivityPub command line client")
+    parser.add_argument(
+        "--insecure",
+        action="store_true",
+        help="Allow insecure HTTP connections (for local development)",
+    )
     subparsers = parser.add_subparsers(dest="subcommand")
 
     login_parser = subparsers.add_parser("login", help="Log into an ActivityPub server")
@@ -305,6 +311,13 @@ def run_command(argv, env=None):
         env = os.environ
 
     args = parser.parse_args(argv)
+
+    if getattr(args, 'insecure', False):
+        warnings.warn(
+            "Running in insecure mode: SSL verification disabled. "
+            "Do not use in production!",
+            UserWarning
+        )
 
     command = get_command(args, env)
 

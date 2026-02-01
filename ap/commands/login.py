@@ -9,6 +9,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import urllib
 import logging
+import warnings
 
 CLIENT_ID = "https://evanp.github.io/ap/client.jsonld"
 REDIRECT_URI = "http://localhost:63546/callback"
@@ -58,7 +59,7 @@ class LoginCommand(Command):
     def save_token(self, token):
         apdir = Path(self.env.get("HOME")) / ".ap"
         if not apdir.exists():
-            apdir.mkdir(700)
+            apdir.mkdir(mode=0o700, parents=True, exist_ok=True)
         data = {"actor_id": self.actor_id, **token}
         with open(apdir / "token.json", "w") as f:
             f.write(json.dumps(data))
@@ -70,6 +71,11 @@ class LoginCommand(Command):
             id (str): The ID of the user to login as; either an
                 ActivityPub ID or a webfinger address
         """
+
+        # Enable insecure transport for local development
+        if self._insecure:
+            os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+            warnings.filterwarnings('ignore', message='Unverified HTTPS request')
 
         self.actor_id = self.get_actor_id(self.id)
         json = self.get_public(self.actor_id)
@@ -83,6 +89,8 @@ class LoginCommand(Command):
         self.verifier = verifier
 
         self.oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE)
+        if self._insecure:
+            self.oauth.verify = False
         authorization_url, state = self.oauth.authorization_url(
             auth_endpoint, code_challenge=challenge, code_challenge_method="S256"
         )
@@ -115,10 +123,15 @@ class LoginCommand(Command):
         if codes is None:
             raise Exception("No code found")
         code = codes[0]
+        fetch_kwargs = {
+            'code': code,
+            'code_verifier': self.verifier,
+            'include_client_id': True,
+        }
+        if self._insecure:
+            fetch_kwargs['verify'] = False
         token = self.oauth.fetch_token(
             self.token_endpoint,
-            code=code,
-            code_verifier=self.verifier,
-            include_client_id=True,
+            **fetch_kwargs,
         )
         self.save_token(token)

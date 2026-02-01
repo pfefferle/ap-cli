@@ -30,6 +30,7 @@ class Command:
         self._session = None
         self._language_code = None
         self._tag_namespace = TAG_NAMESPACE
+        self._insecure = getattr(args, 'insecure', False)
 
     def logged_in_actor_id(self) -> str:
         if self._logged_in_actor_id is None:
@@ -63,6 +64,8 @@ class Command:
         if self._session is None:
             token = self.token_file_data()
             self._session = OAuth2Session(token=token)
+            if self._insecure:
+                self._session.verify = False
         return self._session
 
     def to_id(self, prop: dict|str) -> str:
@@ -103,6 +106,8 @@ class Command:
         return re.match(r"^(acct:)?@?[^@]+@[^@]+$", id) is not None
 
     def is_activitypub_id(self, id: str) -> bool:
+        if self._insecure:
+            return re.match(r"https?:\/\/[\w.-]+(?:\.[\w.-]+)*(?::\d+)?[\w\-\._~:/?#[\]@!$&'()*+,;=]*", id) is not None
         return re.match(r"https:\/\/[\w.-]+(?:\.[\w.-]+)+[\w\-\._~:/?#[\]@!$&'()*+,;=]*", id) is not None
 
     def to_webfinger_url(self, id: str) -> str:
@@ -135,7 +140,7 @@ class Command:
             raise Exception("Invalid id")
 
     def get_public(self, id: str) -> dict:
-        r = requests.get(id, headers=BASE_HEADERS)
+        r = requests.get(id, headers=BASE_HEADERS, verify=not self._insecure)
         r.raise_for_status()
         return r.json()
 
