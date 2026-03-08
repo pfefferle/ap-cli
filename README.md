@@ -51,10 +51,15 @@ Shows the currently logged-in user.
 Gets the object with the given ID and prints it to stdout.
 
 ### `ap inbox`
+
 ### `ap outbox`
+
 ### `ap followers`
+
 ### `ap following`
+
 ### `ap pending followers`
+
 ### `ap pending following`
 
 Shows these collections for the currently logged-in user.
@@ -64,6 +69,7 @@ Shows these collections for the currently logged-in user.
 Follows the user with the given ID.
 
 ### `ap accept follower <id>`
+
 ### `ap reject follower <id>`
 
 Accepts or rejects a follow request from the user with the given ID.
