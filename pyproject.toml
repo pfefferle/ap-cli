@@ -6,7 +6,7 @@ authors = [
     {name = "Evan Prodromou",email = "evan@prodromou.name"}
 ]
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "requests-oauthlib (>=2.0.0,<3.0.0)",
     "tabulate (>=0.9.0,<0.10.0)",
@@ -22,4 +22,3 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 ap = "ap.main:main"
-
