@@ -1,7 +1,11 @@
+[build-system]
+requires = ["uv_build >= 0.10.7, <0.11.0"]
+build-backend = "uv_build"
+
 [project]
 name = "ap"
-version = "0.4.0-dev.0"
-description = ""
+version = "0.4.0.dev1"
+description = "Command-line client for the ActivityPub API"
 authors = [
     {name = "Evan Prodromou",email = "evan@prodromou.name"}
 ]
@@ -14,11 +18,9 @@ dependencies = [
     "toml (>=0.10.2,<0.11.0)",
     "requests (>=2.32.4,<3.0.0)"
 ]
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+keywords = ["activitypub", "social", "client"]
 
-
-[build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
+[project.scripts]
 ap = "ap.main:main"
