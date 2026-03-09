@@ -3,8 +3,8 @@ revision = 3
 requires-python = ">=3.12"
 
 [[package]]
-name = "ap"
-version = "0.4.0.dev2"
+name = "activitypub-cli"
+version = "0.4.0"
 source = { editable = "." }
 dependencies = [
     { name = "requests" },
