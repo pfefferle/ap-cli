@@ -162,3 +162,4 @@ cython_debug/
 # VSCode file
 .vscode
 .venv
+.claude
