@@ -17,7 +17,7 @@ import ap.commands as commands
 def make_parser():
     """Create the top-level parser"""
 
-    parser = argparse.ArgumentParser(description="ActivityPub command line client")
+    parser = argparse.ArgumentParser(prog="ap", description="ActivityPub command line client")
     subparsers = parser.add_subparsers(dest="subcommand")
 
     login_parser = subparsers.add_parser("login", help="Log into an ActivityPub server")
