@@ -20,12 +20,10 @@ I initially developed this program to illustrate how to write client code for th
 
 ## Install
 
-I haven't pushed it to PyPI yet, so you'll have to install it from source:
+The easiest way to install is from [PyPI](https://pypi.org/).
 
 ```bash
-git clone https://github.com/evanp/ap.git
-cd ap
-python setup.py install
+pipx install activitypub-cli
 ```
 
 ## Usage
@@ -91,6 +89,22 @@ Uploads the given file and prints the resulting URL.
 - [@evanp](https://github.com/evanp) (Evan Prodromou; [@evan@cosocial.ca](https://cosocial.ca/users/evan) on Mastodon)
 
 ## Contributing
+
+The project uses [uv](https://docs.astral.sh/uv/). To get set up, clone from Git and set up a virtual environment:
+
+```bash
+git clone https://github.com/evanp/ap.git
+cd ap
+uv venv
+source .venv/bin/activate
+uv pip install -e .
+```
+
+Then you can run the application directly:
+
+```bash
+ap -h
+```
 
 I'm very interested in contributions to this project. Some quick notes:
 

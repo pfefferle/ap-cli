@@ -3,7 +3,7 @@ requires = ["uv_build >= 0.10.7, <0.11.0"]
 build-backend = "uv_build"
 
 [project]
-name = "ap"
+name = "activitypub-cli"
 version = "0.4.0.dev2"
 description = "Command-line client for the ActivityPub API"
 authors = [
