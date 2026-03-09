@@ -3,7 +3,7 @@
 [![license](https://img.shields.io/github/license/evanp/ap.svg)](LICENSE)
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 
-`ap` is a command-line client for the [ActivityPub](https://www.w3.org/TR/activitypub/) protocol.
+`ap` is a command-line client for the [ActivityPub](https://www.w3.org/TR/activitypub/) API.
 
 ## Table of Contents
 
@@ -18,6 +18,12 @@
 
 I initially developed this program to illustrate how to write client code for the ActivityPub API as part of my book for O'Reilly Media, "ActivityPub: Programming for the Social Web".
 
+Note that not all servers that implement the ActivityPub *federation protocol* necessarily implement the ActivityPub *API*. In particular, as of this writing, [Mastodon](https://joinmastodon.org/) does not implement the ActivityPub API; it has its own API. If you're using Mastodon, you may prefer the [toot](https://github.com/ihabunek/toot) CLI instead.
+
+A good list of supporting software is here:
+
+  https://codeberg.org/fediverse/delightful-fediverse-experience/issues/130
+
 ## Install
 
 The easiest way to install is from [PyPI](https://pypi.org/).
@@ -28,13 +34,15 @@ pipx install activitypub-cli
 
 ## Usage
 
-`ap` uses the subcommand pattern common with other large command-line programs like `git` and `docker`.  The full list of subcommands is available by typing `ap --help`. Familiarity with the ActivityPub protocol is helpful for understanding these commands!
+`ap` uses the subcommand pattern common with other large command-line programs like `git` and `docker`.  The full list of subcommands is available by typing `ap --help`. Familiarity with the ActivityPub API is helpful for understanding these commands!
 
 ### `ap login <id>`
 
 Logs in as a user to an ActivityPub API server using OAuth 2.0. The `<id>` argument is a Webfinger ID or the URL of the user's profile.
 
 This stores the OAuth 2.0 token(s) in a file in the user's home directory, `$HOME/.ap/token.json`, so that subsequent commands can use them.
+
+If this fails, it's likely that your server doesn't support the ActivityPub API.
 
 ### `ap logout`
 
@@ -109,7 +117,7 @@ ap -h
 I'm very interested in contributions to this project. Some quick notes:
 
 - Please open an issue before starting work on a new feature. This will help us coordinate and make sure that the feature is a good fit for the project.
-- Ideally, commands should map closely to the ActivityPub protocol. If you're not sure how to do that, please open an issue and we can discuss it.
+- Ideally, commands should map closely to the ActivityPub API. If you're not sure how to do that, please open an issue and we can discuss it.
 - Please make sure that your code passes the existing tests, and add new tests as appropriate.
 - Please make your code format correctly with [Python Black](https://black.readthedocs.io/).
 
