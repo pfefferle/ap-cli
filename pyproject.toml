@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "ap"
-version = "0.4.0.dev1"
+version = "0.4.0.dev2"
 description = "Command-line client for the ActivityPub API"
 authors = [
     {name = "Evan Prodromou",email = "evan@prodromou.name"}
