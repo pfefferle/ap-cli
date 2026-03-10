@@ -1,0 +1,12 @@
+{
+  "client_id": "https://evanp.github.io/ap/cimd.json",
+  "redirect_uris": ["http://localhost:63546/callback"],
+  "client_name": "ap",
+  "logo_uri": "https://evanp.github.io/ap/icon-256.png",
+  "client_uri": "https://github.com/evanp/ap/",
+  "grant_types": [
+    "authorization_code",
+    "refresh_token"
+  ],
+  "response_types": ["code"]
+}
