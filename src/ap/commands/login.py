@@ -68,6 +68,24 @@ class LoginCommand(Command):
         with open(apdir / "token.json", "w") as f:
             f.write(json.dumps(data))
 
+    def register_client(self, registration_endpoint):
+        r = requests.get(CIMD_ID, headers={"Accept": "application/json"})
+        r.raise_for_status()
+        body = r.json()
+        r = requests.post(
+            registration_endpoint,
+            headers={
+                "Accept": "application/json",
+                "Content-Type":  "application/json"
+            },
+            json=body
+        )
+        r.raise_for_status()
+        results = r.json()
+        if "client_id" not in results:
+            raise Exception("No client ID returned")
+        return results["client_id"]
+
     def discover(self, actor_id):
 
         parts = self.discover_well_known(actor_id)
@@ -117,6 +135,8 @@ class LoginCommand(Command):
         elif "activitypub_object_id_as_client_id" in metadata and \
             metadata["activitypub_object_id_as_client_id"]:
             client_id = CLIENT_ID
+        elif "registration_endpoint" in metadata:
+            client_id = self.register_client(metadata['registration_endpoint'])
         else:
             return None
 
