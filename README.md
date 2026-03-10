@@ -38,11 +38,23 @@ pipx install activitypub-cli
 
 ### `ap login <id>`
 
-Logs in as a user to an ActivityPub API server using OAuth 2.0. The `<id>` argument is a Webfinger ID or the URL of the user's profile.
+Logs in as a user to an ActivityPub API server using OAuth 2.0. The `<id>` argument is a [Webfinger](https://www.w3.org/community/reports/socialcg/CG-FINAL-apwf-20240608/) ID like `username@domain.example` or the ActivityPub [Actor ID](https://www.w3.org/TR/activitypub/#actors) (usually an HTTPS URL).
 
-This stores the OAuth 2.0 token(s) in a file in the user's home directory, `$HOME/.ap/token.json`, so that subsequent commands can use them.
+Example with a Webfinger ID:
 
-If this fails, it's likely that your server doesn't support the ActivityPub API.
+```bash
+ap login username@domain.example
+```
+
+Example with an ActivityPub actor ID:
+
+```bash
+ap login https://social.example/person/df816567-4c64-480c-955a-0f734bf93362
+```
+
+`ap login` stores the OAuth 2.0 token(s) in a file in the user's home directory, `$HOME/.ap/token.json`, so that subsequent commands can use them.
+
+If this command fails, it's likely that your server doesn't support the ActivityPub API.
 
 ### `ap logout`
 
