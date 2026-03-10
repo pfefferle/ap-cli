@@ -1,5 +1,8 @@
 name: Test and Publish on Tag
 
+permissions:
+  contents: read
+
 on:
   push:
     tags:
