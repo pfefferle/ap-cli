@@ -16,6 +16,7 @@ from ap.version import __version__
 CLIENT_ID = "https://evanp.github.io/ap/client.jsonld"
 CIMD_ID = "https://evanp.github.io/ap/cimd.json"
 REDIRECT_URI = "http://localhost:63546/callback"
+SOFTWARE_ID = "3A527380-8B36-4759-8C29-279AD50C4838"
 SCOPE = "read write"
 
 class LoginRedirectHandler(BaseHTTPRequestHandler):
@@ -78,7 +79,11 @@ class LoginCommand(Command):
                 "Accept": "application/json",
                 "Content-Type":  "application/json"
             },
-            json=body
+            json={
+                **body,
+                "software_id": SOFTWARE_ID,
+                "software_version": __version__
+            }
         )
         r.raise_for_status()
         results = r.json()
