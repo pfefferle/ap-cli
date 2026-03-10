@@ -62,12 +62,37 @@ class LoginCommand(Command):
         return (auth_endpoint, token_endpoint)
 
     def save_token(self, token):
-        apdir = Path(self.env.get("HOME")) / ".ap"
+        apdir = self.apdir()
         if not apdir.exists():
-            apdir.mkdir(700)
+            apdir.mkdir(0o700)
         data = {"actor_id": self.actor_id, **token}
         with open(apdir / "token.json", "w") as f:
             f.write(json.dumps(data))
+
+    def apdir(self):
+        return Path(self.env.get("HOME")) / ".ap"
+
+    def get_client_id(self, issuer):
+        path = self.apdir() / "client_ids.json"
+        if not path.exists():
+            return None
+        with open(path, "r") as f:
+            data = json.load(f)
+        return data.get(issuer, None)
+
+    def set_client_id(self, issuer, client_id):
+        apdir = self.apdir()
+        if not apdir.exists():
+            apdir.mkdir(0o700)
+        path = apdir / "client_ids.json"
+        if path.exists():
+            with open(path, "r") as f:
+                data = json.load(f)
+        else:
+            data = {}
+        data[issuer] = client_id
+        with open(path, "w") as f:
+            json.dump(data, f)
 
     def register_client(self, registration_endpoint):
         r = requests.get(CIMD_ID, headers={"Accept": "application/json"})
@@ -141,7 +166,13 @@ class LoginCommand(Command):
             metadata["activitypub_object_id_as_client_id"]:
             client_id = CLIENT_ID
         elif "registration_endpoint" in metadata:
-            client_id = self.register_client(metadata['registration_endpoint'])
+            issuer = metadata["issuer"]
+            client_id = self.get_client_id(issuer)
+            if client_id is None:
+                client_id = self.register_client(
+                    metadata['registration_endpoint']
+                )
+                self.set_client_id(issuer, client_id)
         else:
             return None
 

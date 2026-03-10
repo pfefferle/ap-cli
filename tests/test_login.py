@@ -435,4 +435,6 @@ class TestLoginCommand(unittest.TestCase):
 
         self.assertEqual(authorization_params["client_id"][0], DCR_CLIENT_ID)
 
-        mock_file.assert_called_once_with(Path('/home/notauser/.ap/token.json'), 'w')
+        files_written = [call.args for call in mock_file.call_args_list]
+        self.assertIn((Path('/home/notauser/.ap/token.json'), 'w'), files_written)
+        self.assertIn((Path('/home/notauser/.ap/client_ids.json'), 'w'), files_written)
