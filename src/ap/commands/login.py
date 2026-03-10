@@ -9,13 +9,17 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import urllib
 import logging
+import urllib.parse
+import requests
+from ap.version import __version__
 
 CLIENT_ID = "https://evanp.github.io/ap/client.jsonld"
+CIMD_ID = "https://evanp.github.io/ap/cimd.json"
 REDIRECT_URI = "http://localhost:63546/callback"
 SCOPE = "read write"
 
 class LoginRedirectHandler(BaseHTTPRequestHandler):
-    command = None
+    login_command: "LoginCommand | None" = None
 
     def do_GET(self):
         global oauth, token_endpoint, state, verifier, code
@@ -26,9 +30,10 @@ class LoginRedirectHandler(BaseHTTPRequestHandler):
             self.wfile.write(
                 b"<html><head><title>Success</title></head><body><p>You may now close this window.</p></body></html>"
             )
-            LoginRedirectHandler.command.on_callback(
-                urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
-            )
+            if (LoginRedirectHandler.login_command is not None):
+                LoginRedirectHandler.login_command.on_callback(
+                    urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+                )
 
     def log_request(self, code="-", size="-"):
         pass
@@ -63,6 +68,73 @@ class LoginCommand(Command):
         with open(apdir / "token.json", "w") as f:
             f.write(json.dumps(data))
 
+    def discover(self, actor_id):
+
+        parts = self.discover_well_known(actor_id)
+
+        if parts is not None:
+            return parts
+
+        parts = self.discover_actor(actor_id)
+
+        if parts is not None:
+            return parts
+
+        raise Exception('No OAuth metadata discoverable')
+
+    def discover_well_known(self, actor_id):
+        parsed = urllib.parse.urlparse(actor_id)
+        origin = f"{parsed.scheme}://{parsed.netloc}"
+        metadata_url = f"{origin}/.well-known/oauth-authorization-server"
+        user_agent = f"ap/{__version__}"
+        headers = {
+            "Accept": "application/json",
+            "User-Agent": user_agent
+        }
+
+        r = requests.get(metadata_url, headers=headers)
+
+        if not r.ok:
+            return None
+
+        metadata = r.json()
+
+        # TODO: check for PKCE, authorization code flow, refresh
+
+        if "authorization_endpoint" not in metadata:
+            return None
+
+        auth_endpoint = metadata["authorization_endpoint"]
+
+        if "token_endpoint" not in metadata:
+            return None
+
+        token_endpoint = metadata["token_endpoint"]
+
+        if "client_id_metadata_document_supported" in metadata and \
+            metadata["client_id_metadata_document_supported"]:
+            client_id = CIMD_ID
+        elif "activitypub_object_id_as_client_id" in metadata and \
+            metadata["activitypub_object_id_as_client_id"]:
+            client_id = CLIENT_ID
+        else:
+            return None
+
+        return (client_id, auth_endpoint, token_endpoint)
+
+    def discover_actor(self, actor_id):
+
+        actor = self.get_public(actor_id)
+
+        if "objectIDAsClientID" in actor and actor["objectIDAsClientID"]:
+            client_id = CLIENT_ID
+        else:
+            return None
+
+        (auth_endpoint, token_endpoint) = self.oauth_endpoints(actor)
+
+        return (client_id, auth_endpoint, token_endpoint)
+
     def run(self):
         """Log into an ActivityPub server
 
@@ -72,9 +144,9 @@ class LoginCommand(Command):
         """
 
         self.actor_id = self.get_actor_id(self.id)
-        json = self.get_public(self.actor_id)
 
-        (auth_endpoint, token_endpoint) = self.oauth_endpoints(json)
+        (client_id, auth_endpoint, token_endpoint) = \
+            self.discover(self.actor_id)
 
         self.token_endpoint = token_endpoint
 
@@ -82,7 +154,7 @@ class LoginCommand(Command):
 
         self.verifier = verifier
 
-        self.oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE)
+        self.oauth = OAuth2Session(client_id, redirect_uri=REDIRECT_URI, scope=SCOPE)
         authorization_url, state = self.oauth.authorization_url(
             auth_endpoint, code_challenge=challenge, code_challenge_method="S256"
         )
@@ -93,7 +165,7 @@ class LoginCommand(Command):
 
         # Processing continues in on_callback()
 
-        LoginRedirectHandler.command = self
+        LoginRedirectHandler.login_command = self
 
         server = HTTPServer(("localhost", 63546), LoginRedirectHandler)
         server.handle_request()  # To handle only the first request
