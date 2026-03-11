@@ -15,7 +15,7 @@ from ap.version import __version__
 
 CLIENT_ID = "https://evanp.github.io/ap/client.jsonld"
 CIMD_ID = "https://evanp.github.io/ap/cimd.json"
-REDIRECT_URI = "http://localhost:63546/callback"
+REDIRECT_URI = "http://127.0.0.1:63546/callback"
 SOFTWARE_ID = "3A527380-8B36-4759-8C29-279AD50C4838"
 SCOPE = "read write"
 
@@ -223,7 +223,7 @@ class LoginCommand(Command):
 
         LoginRedirectHandler.login_command = self
 
-        server = HTTPServer(("localhost", 63546), LoginRedirectHandler)
+        server = HTTPServer(("127.0.0.1", 63546), LoginRedirectHandler)
         server.handle_request()  # To handle only the first request
         server.server_close()
 
